@@ -1,35 +1,54 @@
-import React from "react";
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { type CourseGoal } from "./interfaces/Course";
+import headerImg from "./assets/goals.jpg";
+import Header from "./components/Header";
+import CourseGoalList from "./components/CourseGoalList";
+import NewGoalForm, { type NewGoalFormValues } from "./components/NewGoalForm";
+import InfoBox from "./components/InfoBox";
+
+const MAX_GOAL_AMOUNT = 4;
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [goals, setGoals] = useState<CourseGoal[]>([]);
+
+  const handleDeleteGoal = (id: string) => {
+    setGoals((prevGoals) => {
+      return prevGoals.filter((goal) => goal.id !== id);
+    });
+  };
+
+  const handleAddGoal = (values: NewGoalFormValues) => {
+    setGoals((prevGoals) => {
+      const goal: CourseGoal = {
+        id: new Date().getMilliseconds().toString(),
+        title: values.goal,
+        text: values.description,
+      };
+
+      return prevGoals.concat(goal);
+    });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <main className="App">
+      <Header image={{ src: headerImg, alt: "A list of goals" }}>
+        <h1>Your course goals</h1>
+      </Header>
+      <NewGoalForm onAdd={handleAddGoal} />
+      {goals.length === 0 && (
+        <InfoBox>
+          <p>No goals found. Maybe add one?</p>
+        </InfoBox>
+      )}
+      {goals.length >= MAX_GOAL_AMOUNT && (
+        <InfoBox type="warning" severity="medium">
+          <p>
+            You`re collecting too much goals. Don`t put too much on your plate.
+          </p>
+        </InfoBox>
+      )}
+      <CourseGoalList goals={goals} onDelete={handleDeleteGoal} />
+    </main>
   );
 }
 
